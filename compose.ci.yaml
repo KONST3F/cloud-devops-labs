@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:15
+    image: postgres:15.17
     environment:
       POSTGRES_USER: labuser
       POSTGRES_PASSWORD: ${DB_PASSWORD:?missing DB password}
