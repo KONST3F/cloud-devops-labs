@@ -1,0 +1,14 @@
+> python tools/ci_evidence.py test
+$ gh api repos/KONST3F/cloud-devops-labs/actions/runs/43199472586
+url: https://github.com/KONST3F/cloud-devops-labs/actions/runs/43199472586
+status: completed conclusion: failure
+$ gh api repos/KONST3F/cloud-devops-labs/actions/runs/43199472586/jobs
+test: failure
+  Run python -m unittest discover -s tests -v: failure
+image: skipped
+deploy: skipped
+$ gh run view 43199472586 --log (relevant lines)
+test	Run python -m unittest discover -s tests -v	2026-11-12T10:20:31.2145004Z FAIL: test_demo_failure (test_demo_failure.BrokenTest.test_demo_failure)
+test	Run python -m unittest discover -s tests -v	2026-11-12T10:20:31.2152014Z AssertionError: 1 != 2 : intentional CI test failure
+
+Код завершения: 0

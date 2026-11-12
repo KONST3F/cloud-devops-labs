@@ -1,0 +1,9 @@
+> python tools/ci_evidence.py bad
+$ gh api repos/KONST3F/cloud-devops-labs/actions/runs/43199953291
+url: https://github.com/KONST3F/cloud-devops-labs/actions/runs/43199953291
+status: completed conclusion: success
+$ gh api repos/KONST3F/cloud-devops-labs/actions/runs/43199953291/jobs
+build: success
+$ gh run view 43199953291 --log (relevant lines)
+
+Код завершения: 0
