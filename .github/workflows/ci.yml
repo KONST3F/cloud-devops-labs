@@ -68,12 +68,11 @@ jobs:
           docker logout ghcr.io
   deploy:
     needs: image
-    runs-on: [self-hosted, Windows, X64, devops-lab]
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - name: Deploy and check
-        shell: pwsh
+      - name: Deploy on temporary GitHub runner and check
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OWNER: ${{ github.repository_owner }}
@@ -81,22 +80,18 @@ jobs:
           DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
           COMPOSE_PROJECT_NAME: devops-ci
         run: |
-          $ErrorActionPreference = 'Stop'
-          if (-not $env:DB_PASSWORD) { throw 'CI_DB_PASSWORD secret is missing' }
-          $env:IMAGE_REF = 'ghcr.io/' + $env:OWNER.ToLowerInvariant() + '/cloud-devops-labs:' + $env:SHA
-          $env:GH_TOKEN | docker login ghcr.io -u $env:OWNER --password-stdin
-          if ($LASTEXITCODE -ne 0) { throw 'Registry login failed' }
-          try {
-            docker compose -f compose.ci.yaml up -d --pull always
-            if ($LASTEXITCODE -ne 0) { throw 'Compose failed' }
-            $ready = $false
-            for ($i = 0; $i -lt 30; $i++) {
-              try {
-                $response = Invoke-RestMethod 'http://127.0.0.1:18083/api/health' -TimeoutSec 3
-                if ($response.status -eq 'ok') { $ready = $true; break }
-              } catch { }
-              Start-Sleep -Seconds 2
-            }
-            if (-not $ready) { throw 'Health check failed' }
-            Write-Output ('API response: ' + ($response | ConvertTo-Json -Compress))
-          } finally { docker logout ghcr.io }
+          set -eu
+          test -n "$DB_PASSWORD"
+          export IMAGE_REF="ghcr.io/$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')/cloud-devops-labs:$SHA"
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$OWNER" --password-stdin
+          trap 'docker logout ghcr.io' EXIT
+          docker compose -f compose.ci.yaml up -d --pull always
+          for n in $(seq 1 30); do
+            if curl --fail --silent --show-error http://127.0.0.1:18083/api/health; then
+              echo
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose -f compose.ci.yaml ps
+          exit 1
