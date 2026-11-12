@@ -55,6 +55,14 @@ jobs:
           severity: CRITICAL
           exit-code: '1'
           skip-setup-trivy: true
+      - name: Save verified image
+        run: docker save notes:ci -o notes-ci.tar
+      - name: Upload verified image
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: notes-ci-image
+          path: notes-ci.tar
+          retention-days: 3
       - name: Publish image
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -72,20 +80,19 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: notes-ci-image
       - name: Deploy on temporary GitHub runner and check
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OWNER: ${{ github.repository_owner }}
-          SHA: ${{ github.sha }}
           DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
           COMPOSE_PROJECT_NAME: devops-ci
+          IMAGE_REF: notes:ci
         run: |
           set -eu
           test -n "$DB_PASSWORD"
-          export IMAGE_REF="ghcr.io/$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')/cloud-devops-labs:$SHA"
-          echo "$GH_TOKEN" | docker login ghcr.io -u "$OWNER" --password-stdin
-          trap 'docker logout ghcr.io' EXIT
-          docker compose -f compose.ci.yaml up -d --pull always
+          docker load -i notes-ci.tar
+          docker compose -f compose.ci.yaml up -d
           for n in $(seq 1 30); do
             if curl --fail --silent --show-error http://127.0.0.1:18083/api/health; then
               echo
@@ -102,31 +109,31 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: notes-ci-image
       - name: Deploy on local computer and check
         shell: powershell
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OWNER: ${{ github.repository_owner }}
-          SHA: ${{ github.sha }}
           DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
           COMPOSE_PROJECT_NAME: devops-ci
+          IMAGE_REF: notes:ci
         run: |
           $ErrorActionPreference = 'Stop'
           if (-not $env:DB_PASSWORD) { throw 'CI_DB_PASSWORD secret is missing' }
-          $env:IMAGE_REF = 'ghcr.io/' + $env:OWNER.ToLowerInvariant() + '/cloud-devops-labs:' + $env:SHA
-          $env:GH_TOKEN | docker login ghcr.io -u $env:OWNER --password-stdin
-          if ($LASTEXITCODE -ne 0) { throw 'Registry login failed' }
-          try {
-            docker compose -f compose.ci.yaml up -d --pull always
-            if ($LASTEXITCODE -ne 0) { throw 'Compose failed' }
-            $ready = $false
-            for ($i = 0; $i -lt 30; $i++) {
-              try {
-                $response = Invoke-RestMethod 'http://127.0.0.1:18083/api/health' -TimeoutSec 3
-                if ($response.status -eq 'ok') { $ready = $true; break }
-              } catch { }
-              Start-Sleep -Seconds 2
-            }
-            if (-not $ready) { throw 'Local API health check failed' }
-            Write-Output ('Local API response: ' + ($response | ConvertTo-Json -Compress))
-          } finally { docker logout ghcr.io }
+          docker load -i notes-ci.tar
+          if ($LASTEXITCODE -ne 0) { throw 'Could not load verified image' }
+          docker pull postgres:15.17
+          if ($LASTEXITCODE -ne 0) { throw 'Could not pull database image' }
+          docker compose -f compose.ci.yaml up -d --pull never
+          if ($LASTEXITCODE -ne 0) { throw 'Compose failed' }
+          $ready = $false
+          for ($i = 0; $i -lt 30; $i++) {
+            try {
+              $response = Invoke-RestMethod 'http://127.0.0.1:18083/api/health' -TimeoutSec 3
+              if ($response.status -eq 'ok') { $ready = $true; break }
+            } catch { }
+            Start-Sleep -Seconds 2
+          }
+          if (-not $ready) { throw 'Local API health check failed' }
+          Write-Output ('Local API response: ' + ($response | ConvertTo-Json -Compress))
