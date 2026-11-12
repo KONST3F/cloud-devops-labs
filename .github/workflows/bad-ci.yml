@@ -1,0 +1,10 @@
+name: Bad pipeline
+on:
+  push:
+    branches: [lab3-bad]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f Dockerfile.bad -t notes:latest .
