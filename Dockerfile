@@ -1,10 +1,11 @@
-FROM python:3.12.8-slim-bookworm AS dependencies
+FROM python:3.12.16-alpine3.24 AS dependencies
+RUN apk upgrade --no-cache
 WORKDIR /build
 COPY requirements.txt .
 RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-FROM python:3.12.8-slim-bookworm
-RUN useradd --system --create-home app
+FROM python:3.12.16-alpine3.24
+RUN apk upgrade --no-cache && adduser -D -h /home/app app
 WORKDIR /app
 COPY --from=dependencies /install /usr/local
 COPY app.py index.html ./
