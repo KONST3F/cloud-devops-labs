@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Заметки</title>
+  <style>
+    body { max-width: 620px; margin: 50px auto; padding: 0 16px; font: 16px Arial, sans-serif; }
+    form { display: flex; gap: 8px; }
+    input { flex: 1; min-width: 0; padding: 10px; }
+    button { padding: 10px 16px; cursor: pointer; }
+    li { margin: 10px 0; }
+    #error { color: #ad2929; }
+  </style>
+</head>
+<body>
+  <h1>Заметки</h1>
+  <form id="form">
+    <input id="body" maxlength="500" placeholder="Текст заметки" required>
+    <button>Добавить</button>
+  </form>
+  <p id="error" role="alert"></p>
+  <ul id="notes"></ul>
+  <script>
+    const form = document.querySelector('#form');
+    const input = document.querySelector('#body');
+    const list = document.querySelector('#notes');
+    const error = document.querySelector('#error');
+    async function loadNotes() {
+      try {
+        const response = await fetch('/api/notes');
+        if (!response.ok) throw new Error('Не удалось загрузить заметки');
+        const data = await response.json();
+        list.replaceChildren();
+        for (const note of data.notes) {
+          const item = document.createElement('li');
+          item.textContent = note.body;
+          list.append(item);
+        }
+        error.textContent = '';
+      } catch (e) { error.textContent = e.message; }
+    }
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      try {
+        const response = await fetch('/api/notes', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({body: input.value})});
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Не удалось сохранить заметку');
+        input.value = '';
+        await loadNotes();
+      } catch (e) { error.textContent = e.message; }
+    });
+    loadNotes();
+  </script>
+</body>
+</html>

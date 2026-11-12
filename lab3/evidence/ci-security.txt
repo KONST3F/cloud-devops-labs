@@ -1,0 +1,16 @@
+> python tools/ci_evidence.py security
+$ gh api repos/KONST3F/cloud-devops-labs/actions/runs/43199535996
+url: https://github.com/KONST3F/cloud-devops-labs/actions/runs/43199535996
+status: completed conclusion: failure
+$ gh api repos/KONST3F/cloud-devops-labs/actions/runs/43199535996/jobs
+test: success
+image: failure
+  Security gate: failure
+  Publish image: skipped
+deploy: skipped
+$ gh run view 43199535996 --log (relevant lines)
+image	Show HIGH and CRITICAL totals	2026-11-12T10:21:56.7675074Z HIGH: 145
+image	Show HIGH and CRITICAL totals	2026-11-12T10:21:56.7675343Z CRITICAL: 9
+image	Security gate	2026-11-12T10:22:03.2995041Z Total: 9 (CRITICAL: 9)
+
+Код завершения: 0

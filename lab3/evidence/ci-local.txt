@@ -1,0 +1,8 @@
+> python tools/ci_evidence.py local
+$ docker ps --filter name=devops-ci-local --format {{.Names}} {{.Status}} {{.Ports}}
+devops-ci-local-app-1 Up 50 seconds (healthy) 127.0.0.1:18083->8000/tcp
+devops-ci-local-db-1 Up 55 seconds (healthy) 5432/tcp
+$ curl.exe --noproxy * --fail --silent --show-error http://127.0.0.1:18083/api/health
+{"status": "ok", "instance": "ci-local"}
+
+Код завершения: 0

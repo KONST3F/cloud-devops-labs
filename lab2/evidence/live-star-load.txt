@@ -1,0 +1,56 @@
+Tight limits: 0.10 CPU, 64 MiB
+$ docker update --cpus 0.10 --memory 64m --memory-swap 64m devops-star-backend-a-1
+devops-star-backend-a-1
+[exit 0]
+$ docker exec devops-star-backend-a-1 cat /sys/fs/cgroup/cpu.stat
+usage_usec 1149512
+user_usec 1053049
+system_usec 96462
+nice_usec 0
+nr_periods 41
+nr_throttled 12
+throttled_usec 273424
+nr_bursts 0
+burst_usec 0
+[exit 0]
+$ docker stats --no-stream --format {{.Name}} CPU={{.CPUPerc}} MEM={{.MemUsage}} devops-star-backend-a-1
+devops-star-backend-a-1 CPU=10.02% MEM=28.5MiB / 64MiB
+[exit 0]
+$ docker exec -i devops-star-backend-b-1 python - < tools/star_load_worker.py
+seconds=12.4 workers=8 HTTP_200=190 errors=0
+[exit 0]
+$ docker exec devops-star-backend-a-1 cat /sys/fs/cgroup/cpu.stat
+usage_usec 2331873
+user_usec 1732711
+system_usec 599161
+nice_usec 0
+nr_periods 162
+nr_throttled 131
+throttled_usec 27809047
+nr_bursts 0
+burst_usec 0
+[exit 0]
+$ docker run --name devops-star-oom-15cdde2a --network none --memory 64m --memory-swap 64m devops-star-backend-a python -c a=bytearray(120*1024*1024); print(len(a))
+
+[exit 137]
+$ docker inspect --format OOMKilled={{.State.OOMKilled}} exit={{.State.ExitCode}} devops-star-oom-15cdde2a
+OOMKilled=true exit=137
+[exit 0]
+$ docker rm -f devops-star-oom-15cdde2a
+devops-star-oom-15cdde2a
+[exit 0]
+Restoring stable limits: 0.75 CPU, 256 MiB
+$ docker update --cpus 0.75 --memory 256m --memory-swap 256m devops-star-backend-a-1
+devops-star-backend-a-1
+[exit 0]
+$ docker stats --no-stream --format {{.Name}} CPU={{.CPUPerc}} MEM={{.MemUsage}} devops-star-backend-a-1
+devops-star-backend-a-1 CPU=74.24% MEM=29.45MiB / 256MiB
+[exit 0]
+$ docker exec -i devops-star-backend-b-1 python - < tools/star_load_worker.py
+seconds=12.0 workers=8 HTTP_200=1497 errors=0
+[exit 0]
+$ docker inspect --format status={{.State.Status}} health={{.State.Health.Status}} devops-star-backend-a-1
+status=running health=healthy
+[exit 0]
+
+Код завершения: 0

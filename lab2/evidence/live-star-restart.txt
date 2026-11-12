@@ -1,0 +1,21 @@
+$ docker compose -f compose.yaml -f compose.star.yaml ps
+NAME                      IMAGE                   COMMAND                  SERVICE     CREATED         STATUS                        PORTS
+devops-star-backend-a-1   devops-star-backend-a   "python app.py"          backend-a   2 minutes ago   Up 57 seconds (healthy)       8000/tcp
+devops-star-backend-b-1   devops-star-backend-b   "python app.py"          backend-b   2 minutes ago   Up About a minute (healthy)   8000/tcp
+devops-star-db-1          postgres:15             "docker-entrypoint.s…"   db          2 minutes ago   Up About a minute (healthy)   5432/tcp
+devops-star-web-1         nginx:1.27.5-alpine     "/docker-entrypoint.…"   web         2 minutes ago   Up About a minute (healthy)   127.0.0.1:80->80/tcp, 127.0.0.1:443->443/tcp
+$ curl.exe --noproxy * -ksS --max-time 5 --resolve notes.local:443:127.0.0.1 https://notes.local/api/health
+{"status": "ok", "instance": "backend-b"}
+$ docker compose -f compose.yaml -f compose.star.yaml ps -q db
+bd75ec2e1c2313cbd97c016a44649143f3033d6db9570031ec170cef0424864a
+$ docker inspect --format {{.RestartCount}} bd75ec2e1c2313cbd97c016a44649143f3033d6db9570031ec170cef0424864a
+1
+$ docker exec -u postgres bd75ec2e1c2313cbd97c016a44649143f3033d6db9570031ec170cef0424864a pg_ctl -D /var/lib/postgresql/data stop -m immediate
+waiting for server to shut down....
+$ docker inspect --format {{.State.Status}} / {{.State.Health.Status}} / {{.State.StartedAt}} / restarts={{.RestartCount}} bd75ec2e1c2313cbd97c016a44649143f3033d6db9570031ec170cef0424864a
+running / healthy / 2026-11-12T10:23:13.320142919Z / restarts=2
+$ curl.exe --noproxy * -ksS --max-time 5 --resolve notes.local:443:127.0.0.1 https://notes.local/api/health
+{"status": "ok", "instance": "backend-b"}
+Database restarted and service responds again.
+
+Код завершения: 0

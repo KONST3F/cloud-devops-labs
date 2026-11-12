@@ -1,0 +1,11 @@
+name: Bad pipeline
+on:
+  workflow_dispatch:
+  push:
+    branches: [lab3-bad]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f lab3/Dockerfile.bad -t notes:latest lab3

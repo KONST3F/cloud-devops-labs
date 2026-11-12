@@ -1,0 +1,151 @@
+name: CI/CD
+on:
+  push:
+    branches: [main, repo-cleanup]
+    paths:
+      - lab3/**
+      - .github/workflows/ci.yml
+  workflow_dispatch:
+    inputs:
+      deploy_local:
+        description: Deploy to an available local runner
+        type: boolean
+        default: false
+permissions:
+  contents: read
+  packages: write
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: lab3
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: lab3/requirements.txt
+      - run: pip install -r requirements.txt
+      - run: python -m compileall -q app.py tests
+      - run: python -m unittest discover -s tests -v
+  image:
+    needs: test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Build
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: ./lab3
+          load: true
+          tags: notes:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Trivy report
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: notes:ci
+          format: json
+          output: trivy.json
+          severity: HIGH,CRITICAL
+          exit-code: '0'
+      - name: Show HIGH and CRITICAL totals
+        run: python lab3/tools/trivy_counts.py trivy.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: trivy-report
+          path: trivy.json
+          retention-days: 7
+      - name: Security gate
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: notes:ci
+          format: table
+          severity: CRITICAL
+          exit-code: '1'
+          skip-setup-trivy: true
+      - name: Save verified image
+        run: docker save notes:ci -o notes-ci.tar
+      - name: Upload verified image
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: notes-ci-image
+          path: notes-ci.tar
+          retention-days: 3
+      - name: Publish image
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          SHA: ${{ github.sha }}
+        run: |
+          OWNER_LOWER="$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')"
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$OWNER" --password-stdin
+          docker tag notes:ci "ghcr.io/$OWNER_LOWER/cloud-devops-labs:$SHA"
+          docker push "ghcr.io/$OWNER_LOWER/cloud-devops-labs:$SHA"
+          docker logout ghcr.io
+  deploy:
+    needs: image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: notes-ci-image
+      - name: Deploy on temporary GitHub runner and check
+        env:
+          DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
+          COMPOSE_PROJECT_NAME: devops-ci
+          IMAGE_REF: notes:ci
+        run: |
+          set -eu
+          test -n "$DB_PASSWORD"
+          docker load -i notes-ci.tar
+          docker compose -f lab3/compose.ci.yaml up -d
+          for n in $(seq 1 30); do
+            if curl --fail --silent --show-error http://127.0.0.1:18083/api/health; then
+              echo
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose -f lab3/compose.ci.yaml ps
+          exit 1
+  deploy_local:
+    if: github.ref == 'refs/heads/main' && (vars.ENABLE_LOCAL_DEPLOY == 'true' || inputs.deploy_local == true)
+    needs: image
+    runs-on: [self-hosted, Windows, X64, devops-lab]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: notes-ci-image
+      - name: Deploy on local computer and check
+        shell: powershell
+        env:
+          DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
+          COMPOSE_PROJECT_NAME: devops-ci
+          IMAGE_REF: notes:ci
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (-not $env:DB_PASSWORD) { throw 'CI_DB_PASSWORD secret is missing' }
+          docker load -i notes-ci.tar
+          if ($LASTEXITCODE -ne 0) { throw 'Could not load verified image' }
+          docker pull postgres:15.17
+          if ($LASTEXITCODE -ne 0) { throw 'Could not pull database image' }
+          docker compose -f lab3/compose.ci.yaml up -d --pull never
+          if ($LASTEXITCODE -ne 0) { throw 'Compose failed' }
+          $ready = $false
+          for ($i = 0; $i -lt 30; $i++) {
+            try {
+              $response = Invoke-RestMethod 'http://127.0.0.1:18083/api/health' -TimeoutSec 3
+              if ($response.status -eq 'ok') { $ready = $true; break }
+            } catch { }
+            Start-Sleep -Seconds 2
+          }
+          if (-not $ready) { throw 'Local API health check failed' }
+          Write-Output ('Local API response: ' + ($response | ConvertTo-Json -Compress))
