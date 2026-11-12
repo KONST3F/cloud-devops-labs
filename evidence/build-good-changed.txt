@@ -1,0 +1,52 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 592B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.12.8-slim-bookworm
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 145B done
+#3 DONE 0.0s
+
+#4 [dependencies 1/4] FROM docker.io/library/python:3.12.8-slim-bookworm@sha256:2199a62885a12290dc9c5be3ca0681d367576ab7bf037da120e564723292a2f0
+#4 resolve docker.io/library/python:3.12.8-slim-bookworm@sha256:2199a62885a12290dc9c5be3ca0681d367576ab7bf037da120e564723292a2f0 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 3.63kB 0.0s done
+#5 DONE 0.0s
+
+#6 [stage-1 2/5] RUN useradd --system --create-home app
+#6 CACHED
+
+#7 [dependencies 2/4] WORKDIR /build
+#7 CACHED
+
+#8 [dependencies 4/4] RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+#8 CACHED
+
+#9 [dependencies 3/4] COPY requirements.txt .
+#9 CACHED
+
+#10 [stage-1 3/5] WORKDIR /app
+#10 CACHED
+
+#11 [stage-1 4/5] COPY --from=dependencies /install /usr/local
+#11 CACHED
+
+#12 [stage-1 5/5] COPY app.py index.html ./
+#12 DONE 0.1s
+
+#13 exporting to image
+#13 exporting layers 0.1s done
+#13 exporting manifest sha256:3cb717e0c6029d0d08b9491a43ada97e42c6bc033d18fe28a632067f06cf0c72 0.0s done
+#13 exporting config sha256:9ee53fbfd30662ac8be941b28480ca30d80ff64289ff98d70d577d543e5de209 done
+#13 exporting attestation manifest sha256:0636c09dbf4190bea986f7e7d760aaf6024527d1ef0a7693391a894b10f4023e 0.0s done
+#13 exporting manifest list sha256:574147814e7e76088b63e3eb2d9d5ea51ade918c1815dfd3cc8164b278bc4305
+#13 exporting manifest list sha256:574147814e7e76088b63e3eb2d9d5ea51ade918c1815dfd3cc8164b278bc4305 0.0s done
+#13 naming to docker.io/library/devops-final-bench:good done
+#13 unpacking to docker.io/library/devops-final-bench:good 0.0s done
+#13 DONE 0.1s

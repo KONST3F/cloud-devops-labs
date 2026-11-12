@@ -1,0 +1,21 @@
+$ curl.exe --noproxy * --silent --show-error --max-time 10 --resolve notes.local:80:127.0.0.1 -I http://notes.local/
+HTTP/1.1 301 Moved Permanently
+Server: nginx/1.27.5
+Date: Thu, 12 Nov 2026 10:09:10 GMT
+Content-Type: text/html
+Content-Length: 169
+Connection: keep-alive
+Location: https://notes.local/
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -I https://notes.local/
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Thu, 12 Nov 2026 10:09:10 GMT
+Content-Type: text/html
+Content-Length: 2062
+Last-Modified: Fri, 30 Oct 2026 14:15:44 GMT
+Connection: keep-alive
+ETag: "6ae4a690-80e"
+Accept-Ranges: bytes
+[exit 0]

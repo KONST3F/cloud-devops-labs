@@ -1,0 +1,40 @@
+HTTP redirect:
+HTTP/1.1 301 Moved Permanently
+Server: nginx/1.27.5
+Date: Thu, 12 Nov 2026 10:09:42 GMT
+Content-Type: text/html
+Backend identifiers:
+X-Backend-Instance: backend-b
+X-Backend-Instance: backend-a
+Failover after stopping backend-a:
+ Container devops-final-backend-a-1 Stopping 
+ Container devops-final-backend-a-1 Stopped 
+HTTP/1.1 200 OK
+X-Backend-Instance: backend-b
+ Container devops-final-db-1 Waiting 
+ Container devops-final-db-1 Healthy 
+ Container devops-final-backend-a-1 Starting 
+ Container devops-final-backend-a-1 Started 
+Admin /admin without password:
+HTTP 401
+Admin /admin with password:
+HTTP 200
+Admin /admin/ without password:
+HTTP 401
+Admin /admin/ with password:
+HTTP 200
+Custom 404:
+HTTP 404
+Custom 404 body matches 404.html
+Alias /docs/:
+HTTP 200
+Second virtual host:
+<!doctype html><html lang="ru"><meta charset="utf-8"><title>Второй сайт</title><h1>Второй сайт</h1></html>
+
+Unknown virtual host:
+Connection closed without serving either project
+Rate limit (count of 429 responses):
+18
+All nginx checks passed.
+
+Код завершения: 0

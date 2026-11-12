@@ -1,0 +1,61 @@
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -D - -o NUL https://notes.local/api/health
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Thu, 12 Nov 2026 10:09:16 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 41
+Connection: keep-alive
+X-Backend-Instance: backend-a
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -D - -o NUL https://notes.local/api/health
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Thu, 12 Nov 2026 10:09:16 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 41
+Connection: keep-alive
+X-Backend-Instance: backend-b
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -D - -o NUL https://notes.local/api/health
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Thu, 12 Nov 2026 10:09:16 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 41
+Connection: keep-alive
+X-Backend-Instance: backend-a
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -D - -o NUL https://notes.local/api/health
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Thu, 12 Nov 2026 10:09:17 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 41
+Connection: keep-alive
+X-Backend-Instance: backend-b
+[exit 0]
+
+$ docker compose stop backend-a
+ Container devops-final-backend-a-1 Stopping 
+ Container devops-final-backend-a-1 Stopped
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -D - -o NUL https://notes.local/api/notes
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Thu, 12 Nov 2026 10:09:22 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 78
+Connection: keep-alive
+X-Backend-Instance: backend-b
+[exit 0]
+
+$ docker compose start backend-a
+ Container devops-final-db-1 Waiting 
+ Container devops-final-db-1 Healthy 
+ Container devops-final-backend-a-1 Starting 
+ Container devops-final-backend-a-1 Started
+[exit 0]

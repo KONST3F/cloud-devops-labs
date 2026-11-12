@@ -1,0 +1,57 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.bad
+#1 transferring dockerfile: 200B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.12
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 145B done
+#3 DONE 0.0s
+
+#4 [1/4] FROM docker.io/library/python:3.12@sha256:17b9724493d916f56565c131f389faff2597f46dec6ce09516f95125bc9f519f
+#4 resolve docker.io/library/python:3.12@sha256:17b9724493d916f56565c131f389faff2597f46dec6ce09516f95125bc9f519f 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 1.03kB done
+#5 DONE 0.0s
+
+#6 [2/4] WORKDIR /app
+#6 CACHED
+
+#7 [3/4] COPY . .
+#7 DONE 0.0s
+
+#8 [4/4] RUN pip install --no-cache-dir 'psycopg[binary]'
+#8 1.352 Collecting psycopg[binary]
+#8 1.654   Downloading psycopg-3.3.9-py3-none-any.whl.metadata (4.4 kB)
+#8 1.760 Collecting typing-extensions>=4.6 (from psycopg[binary])
+#8 1.810   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+#8 2.120 Collecting psycopg-binary==3.3.9 (from psycopg[binary])
+#8 2.175   Downloading psycopg_binary-3.3.9-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.7 kB)
+#8 2.231 Downloading psycopg_binary-3.3.9-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (3.9 MB)
+#8 3.154    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.9/3.9 MB 4.8 MB/s eta 0:00:00
+#8 3.205 Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+#8 3.262 Downloading psycopg-3.3.9-py3-none-any.whl (219 kB)
+#8 3.310 Installing collected packages: typing-extensions, psycopg-binary, psycopg
+#8 3.475 Successfully installed psycopg-3.3.9 psycopg-binary-3.3.9 typing-extensions-4.16.0
+#8 3.475 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#8 3.945 
+#8 3.945 [notice] A new release of pip is available: 25.0.1 -> 26.3
+#8 3.945 [notice] To update, run: pip install --upgrade pip
+#8 DONE 4.0s
+
+#9 exporting to image
+#9 exporting layers
+#9 exporting layers 0.6s done
+#9 exporting manifest sha256:7a86b477bf2f623b7b1664d2033727faa6c8156839ac2dd5df85a2360b9081ec done
+#9 exporting config sha256:20b445cd85839056832a0e21c82047eac2aea20fddbf0cda43922a18feaabc0a done
+#9 exporting attestation manifest sha256:9b7fb2aca8a66bf01dcf986b7a906deca7047ddaaffce0285707506d44d1596b 0.0s done
+#9 exporting manifest list sha256:43ad85d6fc15b073539d9f1ed5b375cbac3fd864c46132e951c62d1b6496f004 done
+#9 naming to docker.io/library/devops-final-bench:bad done
+#9 unpacking to docker.io/library/devops-final-bench:bad
+#9 unpacking to docker.io/library/devops-final-bench:bad 0.2s done
+#9 DONE 0.9s

@@ -1,0 +1,79 @@
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+200
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+200
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+200
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+200
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+200
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+200
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+429
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+429
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+429
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+200
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+429
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+429
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+429
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+429
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+429
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+429
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+429
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+429
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+429
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -o NUL -w %{http_code} https://notes.local/api/health
+429
+[exit 0]

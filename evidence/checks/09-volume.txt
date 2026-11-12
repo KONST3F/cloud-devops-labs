@@ -1,0 +1,33 @@
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 -H "Content-Type: application/json" --data "{\"body\":\"Report volume check\"}" https://notes.local/api/notes
+{"id": 2, "body": "Report volume check"}
+[exit 0]
+
+$ docker compose ps -q db
+d14665a77df61de287b704982b097dc89644e00136cc694a53722d5c57cd7af2
+[exit 0]
+
+$ docker compose stop db
+ Container devops-final-db-1 Stopping 
+ Container devops-final-db-1 Stopped
+[exit 0]
+
+$ docker compose rm -f db
+Going to remove devops-final-db-1
+ Container devops-final-db-1 Removing 
+ Container devops-final-db-1 Removed
+[exit 0]
+
+$ docker compose up -d --no-deps db
+ Container devops-final-db-1 Creating 
+ Container devops-final-db-1 Created 
+ Container devops-final-db-1 Starting 
+ Container devops-final-db-1 Started
+[exit 0]
+
+$ docker compose ps -q db
+37418ca4ed2d17dc23e89f2155c210bdd8db046617740bc3113fb58ed899cb24
+[exit 0]
+
+$ curl.exe --noproxy * --silent --show-error --insecure --max-time 10 --resolve notes.local:443:127.0.0.1 https://notes.local/api/notes
+{"notes": [{"id": 2, "body": "Report volume check"}, {"id": 1, "body": "Report volume check"}], "instance": "backend-b"}
+[exit 0]

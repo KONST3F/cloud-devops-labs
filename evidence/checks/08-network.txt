@@ -1,0 +1,15 @@
+$ docker compose exec -T backend-a python -c "import socket; socket.create_connection(('db',5432),3); print('backend -> db: connected')"
+backend -> db: connected
+[exit 0]
+
+$ docker compose ps -q db
+d14665a77df61de287b704982b097dc89644e00136cc694a53722d5c57cd7af2
+[exit 0]
+
+$ docker inspect --format "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}" d14665a77df61de287b704982b097dc89644e00136cc694a53722d5c57cd7af2
+172.24.0.2
+[exit 0]
+
+$ docker compose exec -T web nc -vz -w 3 172.24.0.2 5432
+nc: 172.24.0.2 (172.24.0.2:5432): Operation timed out
+[exit 1]

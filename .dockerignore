@@ -1,0 +1,13 @@
+.git
+__pycache__
+*.pyc
+*.log
+.env
+certs
+auth
+lab0-screenshot.png
+evidence
+tools
+*.pdf
+*.md
+screenshots/

@@ -1,0 +1,64 @@
+name: devops-labs
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: labuser
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Run setup-local.ps1 first}
+      POSTGRES_DB: notes
+    volumes:
+      - notes_data:/var/lib/postgresql/data
+    networks: [database]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U labuser -d notes"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend-a:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://labuser:${DB_PASSWORD:?Run setup-local.ps1 first}@db:5432/notes
+      INSTANCE_ID: backend-a
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [web, database]
+
+  backend-b:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://labuser:${DB_PASSWORD:?Run setup-local.ps1 first}@db:5432/notes
+      INSTANCE_ID: backend-b
+    networks: [web, database]
+    depends_on:
+      db:
+        condition: service_healthy
+      backend-a:
+        condition: service_healthy
+
+  web:
+    image: nginx:1.27.5-alpine
+    ports:
+      - "127.0.0.1:80:80"
+      - "127.0.0.1:443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./index.html:/srv/site/index.html:ro
+      - ./404.html:/srv/site/404.html:ro
+      - ./docs:/srv/docs:ro
+      - ./second:/srv/second:ro
+      - ./admin:/srv/admin:ro
+      - ./certs:/etc/nginx/certs:ro
+      - ./auth:/etc/nginx/auth:ro
+    depends_on: [backend-a, backend-b]
+    networks: [web]
+
+volumes:
+  notes_data:
+
+networks:
+  web:
+  database:
+    internal: true

@@ -1,0 +1,16 @@
+$ docker compose ps
+NAME                       IMAGE                    COMMAND                  SERVICE     CREATED          STATUS                    PORTS
+devops-final-backend-a-1   devops-final-backend-a   "python app.py"          backend-a   5 minutes ago    Up 32 seconds (healthy)   8000/tcp
+devops-final-backend-b-1   devops-final-backend-b   "python app.py"          backend-b   5 minutes ago    Up 4 minutes (healthy)    8000/tcp
+devops-final-db-1          postgres:15              "docker-entrypoint.s…"   db          25 seconds ago   Up 25 seconds (healthy)   5432/tcp
+devops-final-web-1         nginx:1.27.5-alpine      "/docker-entrypoint.…"   web         5 minutes ago    Up 4 minutes              127.0.0.1:80->80/tcp, 127.0.0.1:443->443/tcp
+[exit 0]
+
+$ docker compose exec -T backend-a whoami
+app
+[exit 0]
+
+$ docker image inspect devops-final-backend-a:latest devops-final:bad --format "{{.RepoTags}} {{.Size}} bytes"
+[devops-final-backend-a:latest] 213749697 bytes
+[devops-final:bad] 1633282248 bytes
+[exit 0]

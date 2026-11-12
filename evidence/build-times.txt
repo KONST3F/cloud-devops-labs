@@ -1,0 +1,4 @@
+One-line code change; warm cache
+Good Dockerfile: 0.62 s
+Bad Dockerfile: 5.34 s
+Detailed build output is in build-good-changed.txt and build-bad-changed.txt.
