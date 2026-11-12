@@ -1,7 +1,7 @@
 name: CI/CD
 on:
   push:
-    branches: [lab3-ci]
+    branches: [lab3-ci, lab3-local]
   workflow_dispatch:
 permissions:
   contents: read
@@ -95,3 +95,38 @@ jobs:
           done
           docker compose -f compose.ci.yaml ps
           exit 1
+  deploy_local:
+    if: github.ref == 'refs/heads/lab3-local'
+    needs: image
+    runs-on: [self-hosted, Windows, X64, devops-lab]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Deploy on local computer and check
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          SHA: ${{ github.sha }}
+          DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
+          COMPOSE_PROJECT_NAME: devops-ci
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (-not $env:DB_PASSWORD) { throw 'CI_DB_PASSWORD secret is missing' }
+          $env:IMAGE_REF = 'ghcr.io/' + $env:OWNER.ToLowerInvariant() + '/cloud-devops-labs:' + $env:SHA
+          $env:GH_TOKEN | docker login ghcr.io -u $env:OWNER --password-stdin
+          if ($LASTEXITCODE -ne 0) { throw 'Registry login failed' }
+          try {
+            docker compose -f compose.ci.yaml up -d --pull always
+            if ($LASTEXITCODE -ne 0) { throw 'Compose failed' }
+            $ready = $false
+            for ($i = 0; $i -lt 30; $i++) {
+              try {
+                $response = Invoke-RestMethod 'http://127.0.0.1:18083/api/health' -TimeoutSec 3
+                if ($response.status -eq 'ok') { $ready = $true; break }
+              } catch { }
+              Start-Sleep -Seconds 2
+            }
+            if (-not $ready) { throw 'Local API health check failed' }
+            Write-Output ('Local API response: ' + ($response | ConvertTo-Json -Compress))
+          } finally { docker logout ghcr.io }
