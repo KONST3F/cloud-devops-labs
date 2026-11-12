@@ -1,5 +1,5 @@
 import json, subprocess, sys
-runs={'test':43199472586,'security':43199535996,'good':43200383287,'bad':43199953291}
+runs={'test':43199472586,'security':43199535996,'good':43200383287,'local_success':43202807488,'bad':43199953291}
 name=sys.argv[1]
 if name=='local':
  for args in (['docker','ps','--filter','name=devops-ci-local','--format','{{.Names}} {{.Status}} {{.Ports}}'], ['curl.exe','--noproxy','*','--fail','--silent','--show-error','http://127.0.0.1:18083/api/health']):
@@ -22,10 +22,10 @@ jobs=json.loads(gh(['api',api+'/jobs']))['jobs']
 for job in jobs:
  print(job['name']+': '+str(job['conclusion']))
  for step in job.get('steps',[]):
-  if step['conclusion'] in ('failure',) or step['name'] in ('Security gate','Publish image','Deploy on temporary GitHub runner and check'):
+  if step['conclusion'] in ('failure',) or step['name'] in ('Security gate','Publish image','Upload verified image','Deploy on temporary GitHub runner and check','Deploy on local computer and check'):
    print('  '+step['name']+': '+str(step['conclusion']))
 print('$ gh run view '+str(run)+' --log (relevant lines)',flush=True)
 logs=gh(['run','view',str(run),'--repo',repo,'--log'])
 for line in logs.splitlines():
- if (name=='test' and ('FAIL: test_demo_failure' in line or 'AssertionError:' in line)) or (name in ('security','good') and (' HIGH: ' in line or ' CRITICAL: ' in line or 'Total: 9 (CRITICAL:' in line or '{"status": "ok"' in line)):
+ if (name=='test' and ('FAIL: test_demo_failure' in line or 'AssertionError:' in line)) or (name in ('security','good','local_success') and (' HIGH: ' in line or ' CRITICAL: ' in line or 'Total: 9 (CRITICAL:' in line or '{"status": "ok"' in line or 'Local API response: {"status":' in line)):
   print(line,flush=True)

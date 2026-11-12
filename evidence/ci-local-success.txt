@@ -1,0 +1,23 @@
+
+
+> python tools/ci_evidence.py local_success
+$ gh api repos/KONST3F/cloud-devops-labs/actions/runs/43202807488
+url: https://github.com/KONST3F/cloud-devops-labs/actions/runs/43202807488
+status: completed conclusion: success
+$ gh api repos/KONST3F/cloud-devops-labs/actions/runs/43202807488/jobs
+test: success
+image: success
+  Security gate: success
+  Upload verified image: success
+  Publish image: success
+deploy_local: success
+  Deploy on local computer and check: success
+deploy: success
+  Deploy on temporary GitHub runner and check: success
+$ gh run view 43202807488 --log (relevant lines)
+image	Show HIGH and CRITICAL totals	2026-11-12T10:43:34.4198664Z HIGH: 0
+image	Show HIGH and CRITICAL totals	2026-11-12T10:43:34.4199786Z CRITICAL: 0
+deploy_local	Deploy on local computer and check	2026-11-12T10:46:43.9073744Z Local API response: {"status":"ok","instance":"ci-local"}
+deploy	Deploy on temporary GitHub runner and check	2026-11-12T10:44:20.7748533Z {"status": "ok", "instance": "ci-local"}
+
+Код завершения: 0
